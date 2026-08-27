@@ -52,6 +52,7 @@
   .card.up{background:var(--chalk);color:var(--slate);border-color:var(--accent);}
   .card.matched{background:var(--found);color:var(--chalk);opacity:.55;cursor:default;}
   .card.small-text{font-size:16px;}
+  .card .op-ou{font-size:.72em;font-weight:600;color:#9aa7b4;font-style:italic;display:inline-block;margin:1px 0;}
   .card:active{transform:translateY(1px);}
   .card:focus-visible,.chip:focus-visible,.btn:focus-visible,.opt:focus-visible,.home-card:focus-visible{
     outline:3px solid var(--accent);outline-offset:2px;}
@@ -201,7 +202,7 @@
       var key=Math.min(a,b)+"x"+Math.max(a,b);
       if(M.mode==="commut"&&seenCalc[key])continue;seenCalc[key]=true;
       if(M.mode==="commut"&&seenRes[res])continue;seenRes[res]=true;
-      var calc=M.mode==="commut"?(a===b?a+" × "+b:a+" × "+b+"\n"+b+" × "+a):a+" × "+b;
+      var calc=M.mode==="commut"?(a===b?a+" × "+b:a+" × "+b+"||ou||"+b+" × "+a):a+" × "+b;
       pairs.push({calc:calc,res:String(res)});}});
     return shuffle(pairs).slice(0,M.count);}
 
@@ -228,8 +229,12 @@
     var n=deck.length,cols=n<=12?4:n<=16?4:5,board=$("m-board");board.style.gridTemplateColumns="repeat("+cols+",1fr)";board.innerHTML="";
     deck.forEach(function(card,i){var up=M.flipped.indexOf(i)>-1||M.matched.indexOf(card.pair)>-1;
       var matched=M.matched.indexOf(card.pair)>-1;var el=document.createElement("button");
-      el.className="card"+(up?" up":"")+(matched?" matched":"")+(card.text.length>4?" small-text":"");
-      el.textContent=up?card.text:"?";el.setAttribute("aria-label",up?card.text:"carte cachée");
+      var plain=card.text.replace(/\|\|/g," ");
+      el.className="card"+(up?" up":"")+(matched?" matched":"")+(plain.length>4?" small-text":"");
+      if(up){el.innerHTML=card.text.split("||").map(function(part){
+        return part==="ou"?'<span class="op-ou">ou</span>':part;}).join("<br>");}
+      else{el.textContent="?";}
+      el.setAttribute("aria-label",up?plain:"carte cachée");
       if(!matched)el.addEventListener("click",(function(x){return function(){mFlip(x);};})(i));board.appendChild(el);});}
   $("m-start").addEventListener("click",mNew);
 
